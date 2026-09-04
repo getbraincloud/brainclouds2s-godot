@@ -40,6 +40,18 @@ func sys_channel_disconnect(channel_id: String, callback: Callable = Callable())
 		"data": {"channelId": channel_id},
 	}, callback)
 
+## Resolves a channel id from a type + sub-id (e.g. ("gl", "gl") for the app's global
+## channel — see cpp-examples/relaytestapp/src/globalChat.cpp:25,69-70 for that exact
+## convention). channel_type is "gl" (global), "gr" (group), or "dy" (dynamic).
+## Requires RTT to already be enabled (RTT_NOT_ENABLED, error 40601, otherwise).
+## Response: {"data": {"channelId": "<appId>:<type>:<resolved>"}, "status": 200}.
+func get_channel_id(channel_type: String, channel_sub_id: String, callback: Callable = Callable()) -> Dictionary:
+	return await _context.request({
+		"service": SERVICE,
+		"operation": "GET_CHANNEL_ID",
+		"data": {"channelType": channel_type, "channelSubId": channel_sub_id},
+	}, callback)
+
 ## Builds a lobby's system channel id from its lobby id. Lobby ids look like
 ## "<appId>:<lobbyType>:<instanceNum>" — everything after the first ":" is the
 ## "instance id" the channel id is built from. Mirrors cpp-s2s's

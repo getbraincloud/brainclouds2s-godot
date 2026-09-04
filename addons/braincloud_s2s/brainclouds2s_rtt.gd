@@ -20,7 +20,7 @@ var _context: S2SContext
 var _socket: WebSocketPeer = null
 var _connection_state: int = ConnectionState.DISCONNECTED
 var _connect_callback: Callable = Callable()
-var _raw_callback: Callable = Callable()
+var _raw_callbacks: Array[Callable] = []
 var _app_id: String = ""
 var _session_id: String = ""
 var _auth: Dictionary = {}
@@ -38,12 +38,19 @@ func _init(context: S2SContext) -> void:
 func is_enabled() -> bool:
 	return _connection_state == ConnectionState.CONNECTED
 
-## Registers a callback for all non-"rtt"-service RTT messages (i.e. relay/game events).
+## Registers a callback for all non-"rtt"-service RTT messages (i.e. relay/game events,
+## or chat-channel pushes). Multiple independent callbacks can be registered at once
+## (e.g. one per subscribed chat channel) — every push goes to all of them.
 func register_raw_callback(callback: Callable) -> void:
-	_raw_callback = callback
+	if not _raw_callbacks.has(callback):
+		_raw_callbacks.append(callback)
 
-func deregister_raw_callback() -> void:
-	_raw_callback = Callable()
+## Removes one previously-registered callback (only that one — other subscribers, e.g.
+## another chat channel's listener, are unaffected). Safe to call with a callback that
+## was never registered (a no-op), so callers don't need to track whether they're
+## currently registered.
+func deregister_raw_callback(callback: Callable) -> void:
+	_raw_callbacks.erase(callback)
 
 ## Requests an RTT endpoint via S2S, then opens a WebSocket connection to it.
 ## `callback`, if given, is invoked once with (success: bool, result: Dictionary) once
@@ -173,8 +180,11 @@ func _handle_packet(packet: PackedByteArray) -> void:
 	_log_wire("WS RECV", text)
 
 	if String(parsed.get("service", "")) != "rtt":
-		if _raw_callback.is_valid():
-			_raw_callback.call(parsed)
+		# Iterate a copy — a callback that deregisters itself (or another) mid-dispatch
+		# must not corrupt this loop.
+		for callback in _raw_callbacks.duplicate():
+			if callback.is_valid():
+				callback.call(parsed)
 		return
 
 	match String(parsed.get("operation", "")):
