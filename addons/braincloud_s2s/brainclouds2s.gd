@@ -44,6 +44,7 @@ var _heartbeat_timer: Timer = null
 
 var _global_file_v3: BrainCloudS2SGlobalFileV3 = null
 var _rtt: BrainCloudS2SRTT = null
+var _chat: BrainCloudS2SChat = null
 
 signal _turn_available
 
@@ -115,6 +116,11 @@ func get_rtt_service() -> BrainCloudS2SRTT:
 	if _rtt == null:
 		_rtt = BrainCloudS2SRTT.new(self)
 	return _rtt
+
+func get_chat_service() -> BrainCloudS2SChat:
+	if _chat == null:
+		_chat = BrainCloudS2SChat.new(self)
+	return _chat
 
 ## Attempt to establish an RTT connection. `callback`, if given, is invoked with
 ## (connected: bool, result: Dictionary) once the attempt succeeds or fails. Once
