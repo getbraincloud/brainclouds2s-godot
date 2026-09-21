@@ -3,9 +3,15 @@
 extends SceneTree
 
 const TEST_FILES := [
+	# Offline suites first — they need no credentials, so a broken ids.cfg shows up as
+	# network failures further down rather than masking these.
+	"res://test/create_context_test.gd",
+	"res://test/secret_obfuscation_test.gd",
 	"res://test/bad_requests_test.gd",
 	"res://test/bad_server_secret_test.gd",
 	"res://test/valid_context_test.gd",
+	"res://test/auto_auth_test.gd",
+	"res://test/callback_test.gd",
 	"res://test/sync_test.gd",
 	"res://test/run_with_timeout_test.gd",
 	"res://test/global_file_v3_test.gd",

@@ -13,3 +13,6 @@
 # Test credentials (never commit)
 test/ids.cfg
 test/output.txt
+
+# BCCM: JUnit XML written by `node bccm test godot_s2s`
+test-results.xml
