@@ -42,13 +42,7 @@ var _retry_count: int = 0
 var _busy: bool = false
 var _heartbeat_timer: Timer = null
 
-# Keep-alive transport. This used to build an HTTPRequest node per call, which is one
-# TCP + TLS handshake for every single S2S request - Godot's HTTPRequest closes its
-# socket after each response and cannot be made to reuse one (measured: 10 requests
-# through a reused HTTPRequest node still produced 10 connections, where one HTTPClient
-# produced 1 connection for 5 requests). An S2S library is long-lived and chatty, so
-# that churn piles up source ports in TIME_WAIT - ~120s on Windows, ~60s on Linux.
-# Same defect the C++ SDK fixed with a shared curl handle in May 2026.
+# Keep-alive transport. 
 var _http: HTTPClient = null
 var _http_host: String = ""
 var _http_port: int = -1
